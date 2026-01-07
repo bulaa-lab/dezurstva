@@ -15,9 +15,8 @@ let zdravniki = [
     { id: 13, ime: 'Jereb', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 14, ime: 'Logar', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 15, ime: 'Fabiani', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
-    { id: 16, ime: 'Krevh', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
-    { id: 17, ime: 'Novak', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
-    { id: 18, ime: 'Golubič', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} }
+    { id: 16, ime: 'Novak', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
+    { id: 17, ime: 'Golubič', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} }
 ];
 
 const DEFAULT_ZDRAVNIKI = zdravniki.map(z => ({ ...z }));
@@ -2062,4 +2061,5 @@ window.generirajVecResitev = generirajVecResitev;
 window.prikaziResitev = prikaziResitev;
 window.prikaziPrejsnjoResitev = prikaziPrejsnjoResitev;
 window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
+
 window.izberiResitev = izberiResitev;
