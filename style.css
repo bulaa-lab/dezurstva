@@ -1,0 +1,466 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    justify-content: center;
+}
+
+button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+}
+
+.panel {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.panel h2 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+#zdravniki-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.zdravnik-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zdravnik-info {
+    flex: 1;
+}
+
+.zdravnik-ime {
+    font-weight: bold;
+    color: #333;
+}
+
+.zdravnik-delovisce {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.zdravnik-stats {
+    text-align: right;
+}
+
+.dezurstev-count {
+    background: #667eea;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+th {
+    background: #667eea;
+    color: white;
+    font-weight: 600;
+}
+
+.vikend {
+    background: #f0f0f0;
+}
+
+.dezurstvo {
+    background: #ffd43b;
+    font-weight: bold;
+}
+
+.danes {
+    background: #74c0fc;
+}
+
+.opozorilo {
+    background: #ffe066;
+    border-left: 4px solid #ff6b6b;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.opozorilo h3 {
+    color: #ff6b6b;
+    margin-bottom: 5px;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dodatni stili za dve delovišči */
+.delovisce-skupina {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+}
+
+.delovisce-skupina h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+}
+
+.btn-mini {
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #6c757d;
+    margin-left: 5px;
+}
+
+.btn-mini:hover {
+    background: #5a6268;
+}
+
+/* Stilizacija za tuje zdravnike */
+.tuji-zdravnik {
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Koledar z več stolpci */
+table th[colspan] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-weight: bold;
+}
+
+table tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Opozorila animacija */
+.opozorilo {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ===== Modal okno ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.modal-content {
+  width: min(920px, 98vw);
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  padding: 18px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.modal-close {
+  background: #e9ecef;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.modal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0 14px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.oznaka-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chip {
+  border: 1px solid #dee2e6;
+  background: white;
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.chip-none { background: #f1f3f5; }
+.chip-hard { background: #ffe3e3; border-color: #ffc9c9; }
+.chip-soft { background: #fff3bf; border-color: #ffe066; }
+.chip-wish { background: #d3f9d8; border-color: #b2f2bb; }
+
+.chip.active {
+  outline: 3px solid rgba(102,126,234,0.35);
+  border-color: #667eea;
+}
+
+.modal-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.cal-head {
+  text-align: center;
+  font-weight: 700;
+  color: #495057;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.cal-cell {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 10px;
+  min-height: 52px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cal-cell.disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.cal-day {
+  font-weight: 700;
+  color: #333;
+  font-size: 14px;
+}
+
+.cal-tag {
+  display: inline-block;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.tag-hard { background: #ffe3e3; border-color: #ffc9c9; }
+.tag-soft { background: #fff3bf; border-color: #ffe066; }
+.tag-wish { background: #d3f9d8; border-color: #b2f2bb; }
+
+.modal-footer {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+select, input[type="number"] {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  font-size: 15px;
+}
+
+
+#opozorila .opozorilo {
+  margin-bottom: 10px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.zdravnik-delovisce.clickable {
+  cursor: pointer;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.zdravnik-delovisce.clickable:hover {
+  text-decoration: underline;
+}
+
+.modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.modal-content{
+  background: #f8f9fa;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 900px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+.modal-header{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  margin-bottom: 12px;
+}
+.modal-close{
+  background:#e03131;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  margin-top: 12px;
+}
+
+.delovisce-btn{
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+}
+.delovisce-btn:hover{
+  transform: translateY(-1px);
+}
+.delovisce-btn.active{
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}

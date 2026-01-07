@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razpored dežurstev</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Razpored dežurstev - <span id="mesec">Januar 2024</span></h1>
+        
+        <div class="controls">
+            <select id="izbira-meseca" onchange="nastaviMesecLeto()"></select>
+            <input id="izbira-leta" type="number" min="2000" max="2100" style="width:110px;" onchange="nastaviMesecLeto()" />
+            <button onclick="generirajRazpored()">🔄 Generiraj razpored</button>
+            <button onclick="generirajVecResitev(5)">🎯 Generiraj 5 rešitev</button>
+            <button onclick="prikaziStatistiko()">📊 Prikaži statistiko</button>
+            <button onclick="shraniRazpored()">💾 Shrani</button>
+            <button onclick="naloziRazpored()">📁 Naloži</button>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <h2>👨‍⚕️ Zdravniki</h2>
+                <div id="zdravniki-list"></div>
+                <button class="btn-small" onclick="dodajZdravnika()">➕ Dodaj zdravnika</button>
+            </div>
+
+            <div class="panel">
+                <h2>📋 Mesečni razpored</h2>
+                <div id="koledar"></div>
+            </div>
+        </div>
+
+        <div id="statistika" class="panel" style="display:none;">
+            <h2>📊 Statistika dežurstev</h2>
+            <div id="statistika-content"></div>
+        </div>
+
+        <div id="opozorila" class="panel"></div>
+    </div>
+    <!-- MODAL: Koledar oznak za zdravnika -->
+    <div id="modal-oznake" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h2 id="modal-naslov">Oznake</h2>
+        <button class="modal-close" onclick="zapriOznakeModal()">✖</button>
+        </div>
+
+        <div class="modal-toolbar">
+        <div class="toolbar-left">
+            <button class="btn-mini" onclick="premakniMesec(-1)">◀</button>
+            <span id="modal-mesec-label" style="font-weight:600;"></span>
+            <button class="btn-mini" onclick="premakniMesec(1)">▶</button>
+        </div>
+
+        <div class="toolbar-right">
+            <span style="color:#6c757d;font-size:13px;">Izbrana oznaka:</span>
+            <span id="izbrana-oznaka-chip" class="chip chip-none">–</span>
+        </div>
+        </div>
+
+        <div class="oznaka-picker">
+        <button class="chip chip-none" onclick="izberiOznakoZaKlik(null)">Brez</button>
+        <button class="chip chip-hard" onclick="izberiOznakoZaKlik('LD')">LD</button>
+        <button class="chip chip-hard" onclick="izberiOznakoZaKlik('MF')">MF</button>
+        <button class="chip chip-hard" onclick="izberiOznakoZaKlik('AMB')">AMB</button>
+        <button class="chip chip-hard" onclick="izberiOznakoZaKlik('CC')">CC</button>
+        <button class="chip chip-hard" onclick="izberiOznakoZaKlik('DRUGO')">delo drugje</button>
+        <button class="chip chip-wish" onclick="izberiOznakoZaKlik('Ž')">Ž</button>
+        <button class="chip chip-soft" onclick="izberiOznakoZaKlik('KI')">KI</button>
+        <button class="chip chip-hard" onclick="izberiOznakoZaKlik('IZ')">IZ</button>
+        </div>
+
+        <div id="modal-koledar" class="modal-calendar"></div>
+
+        <div class="modal-footer">
+        <div style="font-size:13px;color:#6c757d;">
+            Klikni oznako zgoraj, nato klikni dan v koledarju. Ponovni klik na “Brez” odstrani oznako.
+        </div>
+        <button onclick="shraniInZapriKoledar()">💾 Shrani</button>
+        </div>
+    </div>
+    </div>
+
+    <div id="modal-delovisce" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:520px;">
+        <div class="modal-header">
+        <h2 id="modal-delovisce-naslov">Spremeni delovišče</h2>
+        <button class="modal-close" onclick="zapriDelovisceModal()">✖</button>
+        </div>
+
+        <div class="panel" style="background:#fff;">
+        <p style="margin-bottom:12px;color:#495057;">
+            Izberi novo primarno delovišče:
+        </p>
+        <div id="delovisce-gumbi" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="modal-footer">
+        <button class="btn-mini" onclick="zapriDelovisceModal()">Zapri</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- MODAL: Fiksna DTS dežurstva za "samo dežurstva" -->
+    <div id="modal-fiksna" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h2 id="modal-fiksna-naslov">🕒 Fiksna DTS dežurstva</h2>
+        <button class="modal-close" onclick="zapriFiksnaModal()">✖</button>
+        </div>
+
+        <div class="modal-toolbar">
+        <div class="toolbar-left">
+            <button class="btn-mini" onclick="premakniFixMesec(-1)">◀</button>
+            <span id="modal-fiksna-mesec-label" style="font-weight:600;"></span>
+            <button class="btn-mini" onclick="premakniFixMesec(1)">▶</button>
+        </div>
+        <div class="toolbar-right" style="font-size:13px;color:#6c757d;">
+            Klik na dan = Ž → fiksno DTS dežurstvo
+        </div>
+        </div>
+
+        <div id="modal-fiksna-koledar" class="modal-calendar"></div>
+
+        <div class="modal-footer">
+        <button class="btn-mini" onclick="zapriFiksnaModal()">Zapri</button>
+        </div>
+    </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
