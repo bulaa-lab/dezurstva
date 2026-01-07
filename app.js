@@ -63,30 +63,40 @@ const SLO_MESCI = [
 
 function naloziInZdruziZdravnike() {
   const sh = localStorage.getItem("zdravniki");
-  const stored = sh ? JSON.parse(sh) : [];
-  const byId = new Map(stored.map(z => [z.id, z]));
-
-  for (const defZ of DEFAULT_ZDRAVNIKI) {
-    const old = byId.get(defZ.id);
-
-    if (!old) {
-      byId.set(defZ.id, { ...defZ });
-    } else {
-      // default naj zmaga pri "ime" in "samoDezurstva"
-      const merged = { ...old, ...defZ };
-
-      // uporabniku pustiš samo to, kar dejansko spreminja
-      if (old.primarnoDelovisce != null) merged.primarnoDelovisce = old.primarnoDelovisce;
-
-      byId.set(defZ.id, merged);
+  
+  if (sh) {
+    // Če obstajajo shranjeni podatki, jih uporabi
+    const stored = JSON.parse(sh);
+    const byId = new Map(stored.map(z => [z.id, z]));
+    
+    // Združi s DEFAULT podatki (ohrani samo spremembe uporabnika)
+    for (const defZ of DEFAULT_ZDRAVNIKI) {
+      const old = byId.get(defZ.id);
+      
+      if (!old) {
+        byId.set(defZ.id, { ...defZ });
+      } else {
+        // Default vrednosti imajo prednost, razen primarnoDelovisce
+        const merged = { ...defZ };
+        if (old.primarnoDelovisce != null) {
+          merged.primarnoDelovisce = old.primarnoDelovisce;
+        }
+        byId.set(defZ.id, merged);
+      }
     }
+    
+    // Uporabi samo tiste, ki so v DEFAULT seznamu
+    const defaultIds = new Set(DEFAULT_ZDRAVNIKI.map(z => z.id));
+    zdravniki = [...byId.values()]
+      .filter(z => defaultIds.has(z.id))
+      .sort((a, b) => a.id - b.id);
+      
+  } else {
+    // Če NI shranjenih podatkov (novi uporabnik), uporabi DEFAULT zdravnike
+    zdravniki = DEFAULT_ZDRAVNIKI.map(z => ({ ...z }));
   }
-
-  const defaultIds = new Set(DEFAULT_ZDRAVNIKI.map (z => z.id));
-  zdravniki = [...byId.values()]
-    .filter(z => defaultIds.has(z.id))
-    .sort((a,b) => a.id - b.id);
-
+  
+  // Shrani trenutno stanje
   localStorage.setItem("zdravniki", JSON.stringify(zdravniki));
 }
 
