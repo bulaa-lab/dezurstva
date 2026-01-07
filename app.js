@@ -84,7 +84,7 @@ function naloziInZdruziZdravnike() {
 
   const defaultIds = new Set(DEFAULT_ZDRAVNIKI.map (z => z.id));
   zdravniki = [...byId.values()]
-    .filter(z => deafultIds.has(z.id))
+    .filter(z => defaultIds.has(z.id))
     .sort((a,b) => a.id - b.id);
 
   localStorage.setItem("zdravniki", JSON.stringify(zdravniki));
@@ -132,6 +132,10 @@ function keyDopoldan(letoX = leto, mesecX = mesec) {
 
 function keyFiksnaSamo(letoX = leto, mesecX = mesec) {
     return `fiksnaSamo_${letoX}_${mesecX}`;
+}
+
+function keyFiksnaDezurstva(letoX = leto, mesecX = mesec) {
+  return `fiksnaDezurstva_${letoX}_${mesecX}`;
 }
 
 // ========== POMOŽNE FUNKCIJE ZA OZNAKE ==========
@@ -2073,6 +2077,7 @@ window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
 
 window.izberiResitev = izberiResitev;
+
 
 
 
