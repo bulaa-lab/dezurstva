@@ -82,7 +82,11 @@ function naloziInZdruziZdravnike() {
     }
   }
 
-  zdravniki = [...byId.values()].sort((a, b) => a.id - b.id);
+  const deafultIds = new Set(DEAFULT_ZDRAVNIKI.map (z => z.id));
+  zdravniki = [...byId.values()]
+    .filter(z => deafultIds.has(z.id))
+    .sort((a,b) => a.id - b.id);
+
   localStorage.setItem("zdravniki", JSON.stringify(zdravniki));
 }
 
@@ -2063,3 +2067,4 @@ window.prikaziPrejsnjoResitev = prikaziPrejsnjoResitev;
 window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 
 window.izberiResitev = izberiResitev;
+
