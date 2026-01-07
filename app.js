@@ -82,7 +82,7 @@ function naloziInZdruziZdravnike() {
     }
   }
 
-  const deafultIds = new Set(DEAFULT_ZDRAVNIKI.map (z => z.id));
+  const defaultIds = new Set(DEFAULT_ZDRAVNIKI.map (z => z.id));
   zdravniki = [...byId.values()]
     .filter(z => deafultIds.has(z.id))
     .sort((a,b) => a.id - b.id);
@@ -2067,4 +2067,5 @@ window.prikaziPrejsnjoResitev = prikaziPrejsnjoResitev;
 window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 
 window.izberiResitev = izberiResitev;
+
 
