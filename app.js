@@ -1999,6 +1999,11 @@ document.addEventListener("click", (e) => {
   if (e.target === modal) zapriOznakeModal();
 });
 
+function resetPodatkov() {
+  if (!confirm("Pobrišem vse shranjene podatke v tem brskalniku?")) return;
+  localStorage.clear();
+  location.reload();
+}
 
 // ========== INICIALIZACIJA ==========
 // ========== INICIALIZACIJA ==========
@@ -2065,7 +2070,9 @@ window.generirajVecResitev = generirajVecResitev;
 window.prikaziResitev = prikaziResitev;
 window.prikaziPrejsnjoResitev = prikaziPrejsnjoResitev;
 window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
+window.resetPodatkov = resetPodatkov;
 
 window.izberiResitev = izberiResitev;
+
 
 
