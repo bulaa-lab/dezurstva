@@ -226,19 +226,13 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
     }
     
     // HARD oznake (razen AMB in CC na isti dan) blokirajo dežurstvo
-    // V funkciji validirajRazpored(), spremenimo preverjanje HARD oznak:
-
-    // HARD oznaka na ta dan
-    const oznaka = getOznaka(idNum, dan);
     if (oznaka && HARD_CODES.has(oznaka)) {
-        // AMB in CC so dovoljene na isti dan
-        if (oznaka !== 'AMB' && oznaka !== 'CC') {
-            issues.push({
-                tip: "Kršitev",
-                dan: dan,
-                msg: `❌ ${imeZ(id)} dežura na ${delovisce}, ima HARD oznako (${oznaka})`
-            });
+        // AMB in CC lahko dežurajo NA ISTI DAN
+        if (oznaka === 'AMB' || oznaka === 'CC') {
+            return true;  // LAHKO dežura
         }
+        // Ostale HARD oznake (LD, MF, DRUGO, IZ) blokirajo
+        return false;
     }
 
     // HARD oznaka jutri (razen AMB/CC) blokira danes
@@ -248,7 +242,8 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
 
     return true;
 }
-// ========== POPRAVLJENA GLAVNA FUNKCIJA ==========
+
+
 // ========== POPRAVLJENA FUNKCIJA generirajRazpored ==========
 function generirajRazpored() {
     const dniVMesecu = new Date(leto, mesec, 0).getDate();
@@ -494,12 +489,16 @@ function validirajRazpored() {
             const idNum = Number(id);
 
             // HARD oznaka na ta dan
-            if (imaHard(idNum, dan)) {
-                issues.push({
-                    tip: "Kršitev",
-                    dan: dan,
-                    msg: `❌ ${imeZ(id)} dežura na ${delovisce}, ima HARD oznako (${getOznaka(idNum, dan)})`
-                });
+            const oznaka = getOznaka(idNum, dan);
+            if (oznaka && HARD_CODES.has(oznaka)) {
+                // AMB in CC so dovoljene na isti dan
+                if (oznaka !== 'AMB' && oznaka !== 'CC') {
+                    issues.push({
+                        tip: "Kršitev",
+                        dan: dan,
+                        msg: `❌ ${imeZ(id)} dežura na ${delovisce}, ima HARD oznako (${oznaka})`
+                    });
+                }
             }
 
             // HARD oznaka jutri
@@ -1537,17 +1536,18 @@ function prikaziZdravnike() {
   html += `<div class="delovisce-skupina">
     <h3>🕒 Samo dežurstva (fiksno)</h3>`;
 
+  // V prikazu zdravnikov
   html += samo.map(z => `
-    <div class="zdravnik-card">
-      <div class="zdravnik-info">
-        <div class="zdravnik-ime">${z.ime}</div>
-        <div style="color:#6c757d;font-size:13px;">Samo dežurstva • DTS</div>
+      <div class="zdravnik-card">
+        <div class="zdravnik-info">
+          <div class="zdravnik-ime">${z.ime}</div>
+          <div style="color:#6c757d;font-size:13px;">Samo dežurstva • ${z.primarnoDelovisce}</div>
+        </div>
+        <div class="zdravnik-stats">
+          <span class="dezurstev-count">${z.dezurstev} dežurstev</span>
+          <button class="btn-mini" onclick="odpriFiksnaDezurstvaModal(${z.id})">📅</button>
+        </div>
       </div>
-      <div class="zdravnik-stats">
-        <span class="dezurstev-count">${z.dezurstev} dežurstev</span>
-        <button class="btn-mini" onclick="odpriFiksnaDezurstvaModal(${z.id})">📅</button>
-      </div>
-    </div>
   `).join("");
 
   html += `</div>`;
@@ -2110,6 +2110,7 @@ window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
 
 window.izberiResitev = izberiResitev;
+
 
 
 
