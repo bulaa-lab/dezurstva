@@ -1938,6 +1938,13 @@ function prikaziStatistiko() {
     content.innerHTML = html;
 }
 
+function zapriFiksnaModal() {
+  const modal = document.getElementById("modal-fiksna");
+  if (modal) modal.style.display = "none";
+  modalFixZdravnikId = null;
+}
+
+
 function nastaviOdsotnost(zdravnikId) {
     const zdravnik = zdravniki.find(z => z.id === zdravnikId);
 
@@ -2045,6 +2052,7 @@ window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
 window.zapriFiksnaModal = zapriFiksnaModal;
 window.izberiResitev = izberiResitev;
+
 
 
 
