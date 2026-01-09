@@ -960,71 +960,6 @@ function resiRazporedBacktrackingRandom(dniVMesecu, seed) {
 //     return true; // TODO: implementiraj
 // }
 
-function resiRazporedBacktrackingRandom(dniVMesecu, seed) {
-    const sloti = [];
-    
-    for (let dan = 1; dan <= dniVMesecu; dan++) {
-        for (const delovisce of DELOVISCA) {
-            if (dezurstva[delovisce][dan]) continue;
-            sloti.push({ dan, delovisce });
-        }
-    }
-    
-    // Drugačno razvrščanje slotov za vsako rešitev
-    if (seed > 0) {
-        // Naključno premešaj slote za različne rešitve
-        sloti.sort(() => Math.random() - 0.5);
-    } else {
-        // Prvi poskus - razvrsti po težavnosti
-        sloti.sort((a, b) => {
-            const kandA = zdravniki.filter(z => lahkoDezura(z.id, a.dan, a.delovisce, dezurstva)).length;
-            const kandB = zdravniki.filter(z => lahkoDezura(z.id, b.dan, b.delovisce, dezurstva)).length;
-            return kandA - kandB;
-        });
-    }
-    
-    function backtrack(idx) {
-        if (idx >= sloti.length) return true;
-        
-        const { dan, delovisce } = sloti[idx];
-        let kandidati = zdravniki.filter(z => lahkoDezura(z.id, dan, delovisce, dezurstva));
-        
-        if (kandidati.length === 0) return false;
-        
-        // Razvrsti kandidate po oceni
-        kandidati.sort((a, b) => {
-            const ocenaA = oceniKandidata(a.id, dan, delovisce);
-            const ocenaB = oceniKandidata(b.id, dan, delovisce);
-            return ocenaB - ocenaA;
-        });
-        
-        // Za različnost - včasih vzemi drugega najboljšega kandidata
-        if (seed > 0 && Math.random() < 0.3 && kandidati.length > 1) {
-            // 30% verjetnost, da vzamemo drugega najboljšega
-            const temp = kandidati[0];
-            kandidati[0] = kandidati[1];
-            kandidati[1] = temp;
-        }
-        
-        for (const kandidat of kandidati) {
-            dezurstva[delovisce][dan] = kandidat.id;
-            kandidat.dezurstev++;
-            kandidat.dezurstvaPoDnevih[dan] = delovisce;
-            
-            if (backtrack(idx + 1)) {
-                return true;
-            }
-            
-            delete dezurstva[delovisce][dan];
-            kandidat.dezurstev--;
-            delete kandidat.dezurstvaPoDnevih[dan];
-        }
-        
-        return false;
-    }
-    
-    return backtrack(0);
-}
 
 function izracunajStatistikoResitve() {
     const issues = validirajRazpored();
@@ -2110,6 +2045,7 @@ window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
 
 window.izberiResitev = izberiResitev;
+
 
 
 
