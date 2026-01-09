@@ -12,8 +12,8 @@ let zdravniki = [
     { id: 10, ime: 'Tomašič', primarnoDelovisce: 'DTS', samoDezurstva: false, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 11, ime: 'Kaplan', primarnoDelovisce: 'Vrazov trg', samoDezurstva: false, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 12, ime: 'Radinović', primarnoDelovisce: 'Vrazov trg', samoDezurstva: false, dezurstev: 0, dezurstvaPoDnevih: {} },
-    { id: 13, ime: 'Jereb', primarnoDelovisce: 'Vrazov trg', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
-    { id: 14, ime: 'Logar', primarnoDelovisce: 'Vrazov trg', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
+    { id: 13, ime: 'Jereb', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
+    { id: 14, ime: 'Logar', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 15, ime: 'Fabiani', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 16, ime: 'Novak', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 17, ime: 'Golubič', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} }
@@ -159,16 +159,7 @@ function imaHard(zdravnikId, dan) {
 }
 
 function blokiranDanZaradiJutri(zdravnikId, dan) {
-    const oznakaJutri = getOznaka(zdravnikId, dan + 1);
-    if (!oznakaJutri) return false;
-    
-    // AMB in CC jutri blokirajo danes
-    if (oznakaJutri === 'AMB' || oznakaJutri === 'CC') {
-        return true;
-    }
-    
-    // Ostale HARD oznake jutri tudi blokirajo danes
-    return HARD_CODES.has(oznakaJutri);
+    return imaHard(zdravnikId, dan + 1);
 }
 
 // ========== IZBOLJŠAN ALGORITEM Z BACKTRACKING ==========
@@ -180,11 +171,12 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
     if (!zdravnik) return false;
 
     // Zdravniki "samo dežurstva" se obravnavajo drugače
+    // Oni so že dodeljeni v fiksnih slotih, ne smejo biti kandidirani za druge
     if (zdravnik.samoDezurstva) {
-        return false;
+        return false; // Ne more biti kandidat za navadne slote
     }
 
-    // Ne sme biti dežuren isti dan na drugem delovišču
+    // 2) Ne sme biti dežuren isti dan na drugem delovišču
     for (const d of DELOVISCA) {
         if (d !== delovisce) {
             const trenutniId = Number(trenutniRazpored[d]?.[dan] || 0);
@@ -194,7 +186,7 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
         }
     }
 
-    // Ne sme biti dežuren dva dni zapored (kjerkoli)
+    // 3) Ne sme biti dežuren dva dni zapored (kjerkoli)
     if (dan > 1) {
         for (const d of DELOVISCA) {
             const vcerajId = Number(trenutniRazpored[d]?.[dan - 1] || 0);
@@ -214,28 +206,12 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
         }
     }
 
-    const oznaka = getOznaka(zdravnikId, dan);
-    
-    // NOVO: AMB in CC lahko dežurajo na isti dan, vendar:
-    // - Če ima AMB/CC jutri, ne more dežurati danes
-    if (dan < 31) {
-        const oznakaJutri = getOznaka(zdravnikId, dan + 1);
-        if (oznakaJutri === 'AMB' || oznakaJutri === 'CC') {
-            return false;  // Ne more dežurati dan pred AMB/CC
-        }
-    }
-    
-    // HARD oznake (razen AMB in CC na isti dan) blokirajo dežurstvo
-    if (oznaka && HARD_CODES.has(oznaka)) {
-        // AMB in CC lahko dežurajo NA ISTI DAN
-        if (oznaka === 'AMB' || oznaka === 'CC') {
-            return true;  // LAHKO dežura
-        }
-        // Ostale HARD oznake (LD, MF, DRUGO, IZ) blokirajo
+    // 4) HARD oznaka na ta dan
+    if (imaHard(zdravnikId, dan)) {
         return false;
     }
 
-    // HARD oznaka jutri (razen AMB/CC) blokira danes
+    // 5) HARD oznaka jutri (blokira danes)
     if (blokiranDanZaradiJutri(zdravnikId, dan)) {
         return false;
     }
@@ -243,7 +219,7 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
     return true;
 }
 
-
+// ========== POPRAVLJENA GLAVNA FUNKCIJA ==========
 // ========== POPRAVLJENA FUNKCIJA generirajRazpored ==========
 function generirajRazpored() {
     const dniVMesecu = new Date(leto, mesec, 0).getDate();
@@ -489,16 +465,12 @@ function validirajRazpored() {
             const idNum = Number(id);
 
             // HARD oznaka na ta dan
-            const oznaka = getOznaka(idNum, dan);
-            if (oznaka && HARD_CODES.has(oznaka)) {
-                // AMB in CC so dovoljene na isti dan
-                if (oznaka !== 'AMB' && oznaka !== 'CC') {
-                    issues.push({
-                        tip: "Kršitev",
-                        dan: dan,
-                        msg: `❌ ${imeZ(id)} dežura na ${delovisce}, ima HARD oznako (${oznaka})`
-                    });
-                }
+            if (imaHard(idNum, dan)) {
+                issues.push({
+                    tip: "Kršitev",
+                    dan: dan,
+                    msg: `❌ ${imeZ(id)} dežura na ${delovisce}, ima HARD oznako (${getOznaka(idNum, dan)})`
+                });
             }
 
             // HARD oznaka jutri
@@ -960,6 +932,71 @@ function resiRazporedBacktrackingRandom(dniVMesecu, seed) {
 //     return true; // TODO: implementiraj
 // }
 
+function resiRazporedBacktrackingRandom(dniVMesecu, seed) {
+    const sloti = [];
+    
+    for (let dan = 1; dan <= dniVMesecu; dan++) {
+        for (const delovisce of DELOVISCA) {
+            if (dezurstva[delovisce][dan]) continue;
+            sloti.push({ dan, delovisce });
+        }
+    }
+    
+    // Drugačno razvrščanje slotov za vsako rešitev
+    if (seed > 0) {
+        // Naključno premešaj slote za različne rešitve
+        sloti.sort(() => Math.random() - 0.5);
+    } else {
+        // Prvi poskus - razvrsti po težavnosti
+        sloti.sort((a, b) => {
+            const kandA = zdravniki.filter(z => lahkoDezura(z.id, a.dan, a.delovisce, dezurstva)).length;
+            const kandB = zdravniki.filter(z => lahkoDezura(z.id, b.dan, b.delovisce, dezurstva)).length;
+            return kandA - kandB;
+        });
+    }
+    
+    function backtrack(idx) {
+        if (idx >= sloti.length) return true;
+        
+        const { dan, delovisce } = sloti[idx];
+        let kandidati = zdravniki.filter(z => lahkoDezura(z.id, dan, delovisce, dezurstva));
+        
+        if (kandidati.length === 0) return false;
+        
+        // Razvrsti kandidate po oceni
+        kandidati.sort((a, b) => {
+            const ocenaA = oceniKandidata(a.id, dan, delovisce);
+            const ocenaB = oceniKandidata(b.id, dan, delovisce);
+            return ocenaB - ocenaA;
+        });
+        
+        // Za različnost - včasih vzemi drugega najboljšega kandidata
+        if (seed > 0 && Math.random() < 0.3 && kandidati.length > 1) {
+            // 30% verjetnost, da vzamemo drugega najboljšega
+            const temp = kandidati[0];
+            kandidati[0] = kandidati[1];
+            kandidati[1] = temp;
+        }
+        
+        for (const kandidat of kandidati) {
+            dezurstva[delovisce][dan] = kandidat.id;
+            kandidat.dezurstev++;
+            kandidat.dezurstvaPoDnevih[dan] = delovisce;
+            
+            if (backtrack(idx + 1)) {
+                return true;
+            }
+            
+            delete dezurstva[delovisce][dan];
+            kandidat.dezurstev--;
+            delete kandidat.dezurstvaPoDnevih[dan];
+        }
+        
+        return false;
+    }
+    
+    return backtrack(0);
+}
 
 function izracunajStatistikoResitve() {
     const issues = validirajRazpored();
@@ -1469,20 +1506,19 @@ function prikaziZdravnike() {
 
   // 2) samo dežurstva (ločeno)
   html += `<div class="delovisce-skupina">
-    <h3>🕒 Samo dežurstva (fiksno)</h3>`;
+    <h3>🕒 Samo dežurstva (fiksno DTS)</h3>`;
 
-  // V prikazu zdravnikov
   html += samo.map(z => `
-      <div class="zdravnik-card">
-        <div class="zdravnik-info">
-          <div class="zdravnik-ime">${z.ime}</div>
-          <div style="color:#6c757d;font-size:13px;">Samo dežurstva • ${z.primarnoDelovisce}</div>
-        </div>
-        <div class="zdravnik-stats">
-          <span class="dezurstev-count">${z.dezurstev} dežurstev</span>
-          <button class="btn-mini" onclick="odpriFiksnaDezurstvaModal(${z.id})">📅</button>
-        </div>
+    <div class="zdravnik-card">
+      <div class="zdravnik-info">
+        <div class="zdravnik-ime">${z.ime}</div>
+        <div style="color:#6c757d;font-size:13px;">Samo dežurstva • DTS</div>
       </div>
+      <div class="zdravnik-stats">
+        <span class="dezurstev-count">${z.dezurstev} dežurstev</span>
+        <button class="btn-mini" onclick="odpriFiksnaDezurstvaModal(${z.id})">📅</button>
+      </div>
+    </div>
   `).join("");
 
   html += `</div>`;
@@ -1754,6 +1790,7 @@ function shraniInZapriKoledar() {
   zapriOznakeModal(); 
 }
 
+
 function odpriFiksnaDezurstvaModal(zdravnikId) {
   const z = zdravniki.find(x => x.id === zdravnikId);
   if (!z) return;
@@ -1763,10 +1800,15 @@ function odpriFiksnaDezurstvaModal(zdravnikId) {
   fixModalLeto = leto;
 
   document.getElementById("modal-fiksna-naslov").textContent =
-    `🕒 Fiksna dežurstva – ${z.ime}`;  // Odstranimo "DTS"
+    `🕒 Fiksna DTS dežurstva – ${z.ime}`;
 
   document.getElementById("modal-fiksna").style.display = "flex";
   renderFixModalKoledar();
+}
+
+function zapriFiksnaModal() {
+  document.getElementById("modal-fiksna").style.display = "none";
+  modalFixZdravnikId = null;
 }
 
 function premakniFixMesec(delta) {
@@ -1938,13 +1980,6 @@ function prikaziStatistiko() {
     content.innerHTML = html;
 }
 
-function zapriFiksnaModal() {
-  const modal = document.getElementById("modal-fiksna");
-  if (modal) modal.style.display = "none";
-  modalFixZdravnikId = null;
-}
-
-
 function nastaviOdsotnost(zdravnikId) {
     const zdravnik = zdravniki.find(z => z.id === zdravnikId);
 
@@ -2050,16 +2085,8 @@ window.prikaziResitev = prikaziResitev;
 window.prikaziPrejsnjoResitev = prikaziPrejsnjoResitev;
 window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
-window.zapriFiksnaModal = zapriFiksnaModal;
+
 window.izberiResitev = izberiResitev;
-
-
-
-
-
-
-
-
 
 
 
