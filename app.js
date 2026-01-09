@@ -2043,8 +2043,9 @@ window.prikaziResitev = prikaziResitev;
 window.prikaziPrejsnjoResitev = prikaziPrejsnjoResitev;
 window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
-
+window.zapriFiksnaModal = zapriFiksnaModal;
 window.izberiResitev = izberiResitev;
+
 
 
 
