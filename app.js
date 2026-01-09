@@ -12,8 +12,8 @@ let zdravniki = [
     { id: 10, ime: 'Tomašič', primarnoDelovisce: 'DTS', samoDezurstva: false, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 11, ime: 'Kaplan', primarnoDelovisce: 'Vrazov trg', samoDezurstva: false, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 12, ime: 'Radinović', primarnoDelovisce: 'Vrazov trg', samoDezurstva: false, dezurstev: 0, dezurstvaPoDnevih: {} },
-    { id: 13, ime: 'Jereb', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
-    { id: 14, ime: 'Logar', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
+    { id: 13, ime: 'Jereb', primarnoDelovisce: 'Vrazov trg', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
+    { id: 14, ime: 'Logar', primarnoDelovisce: 'Vrazov trg', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 15, ime: 'Fabiani', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 16, ime: 'Novak', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} },
     { id: 17, ime: 'Golubič', primarnoDelovisce: 'DTS', samoDezurstva: true, dezurstev: 0, dezurstvaPoDnevih: {} }
@@ -2087,6 +2087,7 @@ window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
 
 window.izberiResitev = izberiResitev;
+
 
 
 
