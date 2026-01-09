@@ -159,7 +159,16 @@ function imaHard(zdravnikId, dan) {
 }
 
 function blokiranDanZaradiJutri(zdravnikId, dan) {
-    return imaHard(zdravnikId, dan + 1);
+    const oznakaJutri = getOznaka(zdravnikId, dan + 1);
+    if (!oznakaJutri) return false;
+    
+    // AMB in CC jutri blokirajo danes
+    if (oznakaJutri === 'AMB' || oznakaJutri === 'CC') {
+        return true;
+    }
+    
+    // Ostale HARD oznake jutri tudi blokirajo danes
+    return HARD_CODES.has(oznakaJutri);
 }
 
 // ========== IZBOLJŠAN ALGORITEM Z BACKTRACKING ==========
@@ -171,12 +180,11 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
     if (!zdravnik) return false;
 
     // Zdravniki "samo dežurstva" se obravnavajo drugače
-    // Oni so že dodeljeni v fiksnih slotih, ne smejo biti kandidirani za druge
     if (zdravnik.samoDezurstva) {
-        return false; // Ne more biti kandidat za navadne slote
+        return false;
     }
 
-    // 2) Ne sme biti dežuren isti dan na drugem delovišču
+    // Ne sme biti dežuren isti dan na drugem delovišču
     for (const d of DELOVISCA) {
         if (d !== delovisce) {
             const trenutniId = Number(trenutniRazpored[d]?.[dan] || 0);
@@ -186,7 +194,7 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
         }
     }
 
-    // 3) Ne sme biti dežuren dva dni zapored (kjerkoli)
+    // Ne sme biti dežuren dva dni zapored (kjerkoli)
     if (dan > 1) {
         for (const d of DELOVISCA) {
             const vcerajId = Number(trenutniRazpored[d]?.[dan - 1] || 0);
@@ -206,19 +214,40 @@ function lahkoDezura(zdravnikId, dan, delovisce, trenutniRazpored) {
         }
     }
 
-    // 4) HARD oznaka na ta dan
-    if (imaHard(zdravnikId, dan)) {
-        return false;
+    const oznaka = getOznaka(zdravnikId, dan);
+    
+    // NOVO: AMB in CC lahko dežurajo na isti dan, vendar:
+    // - Če ima AMB/CC jutri, ne more dežurati danes
+    if (dan < 31) {
+        const oznakaJutri = getOznaka(zdravnikId, dan + 1);
+        if (oznakaJutri === 'AMB' || oznakaJutri === 'CC') {
+            return false;  // Ne more dežurati dan pred AMB/CC
+        }
+    }
+    
+    // HARD oznake (razen AMB in CC na isti dan) blokirajo dežurstvo
+    // V funkciji validirajRazpored(), spremenimo preverjanje HARD oznak:
+
+    // HARD oznaka na ta dan
+    const oznaka = getOznaka(idNum, dan);
+    if (oznaka && HARD_CODES.has(oznaka)) {
+        // AMB in CC so dovoljene na isti dan
+        if (oznaka !== 'AMB' && oznaka !== 'CC') {
+            issues.push({
+                tip: "Kršitev",
+                dan: dan,
+                msg: `❌ ${imeZ(id)} dežura na ${delovisce}, ima HARD oznako (${oznaka})`
+            });
+        }
     }
 
-    // 5) HARD oznaka jutri (blokira danes)
+    // HARD oznaka jutri (razen AMB/CC) blokira danes
     if (blokiranDanZaradiJutri(zdravnikId, dan)) {
         return false;
     }
 
     return true;
 }
-
 // ========== POPRAVLJENA GLAVNA FUNKCIJA ==========
 // ========== POPRAVLJENA FUNKCIJA generirajRazpored ==========
 function generirajRazpored() {
@@ -1506,7 +1535,7 @@ function prikaziZdravnike() {
 
   // 2) samo dežurstva (ločeno)
   html += `<div class="delovisce-skupina">
-    <h3>🕒 Samo dežurstva (fiksno DTS)</h3>`;
+    <h3>🕒 Samo dežurstva (fiksno)</h3>`;
 
   html += samo.map(z => `
     <div class="zdravnik-card">
@@ -1790,7 +1819,6 @@ function shraniInZapriKoledar() {
   zapriOznakeModal(); 
 }
 
-
 function odpriFiksnaDezurstvaModal(zdravnikId) {
   const z = zdravniki.find(x => x.id === zdravnikId);
   if (!z) return;
@@ -1800,15 +1828,10 @@ function odpriFiksnaDezurstvaModal(zdravnikId) {
   fixModalLeto = leto;
 
   document.getElementById("modal-fiksna-naslov").textContent =
-    `🕒 Fiksna DTS dežurstva – ${z.ime}`;
+    `🕒 Fiksna dežurstva – ${z.ime}`;  // Odstranimo "DTS"
 
   document.getElementById("modal-fiksna").style.display = "flex";
   renderFixModalKoledar();
-}
-
-function zapriFiksnaModal() {
-  document.getElementById("modal-fiksna").style.display = "none";
-  modalFixZdravnikId = null;
 }
 
 function premakniFixMesec(delta) {
@@ -2087,6 +2110,7 @@ window.prikaziNaslednjoResitev = prikaziNaslednjoResitev;
 window.resetPodatkov = resetPodatkov;
 
 window.izberiResitev = izberiResitev;
+
 
 
 
